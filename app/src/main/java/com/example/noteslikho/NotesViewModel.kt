@@ -13,9 +13,9 @@ class NotesViewModel (private val repository: NotesRepository):ViewModel() {
     val notes: Flow<List<Notes?>>  = repository.allNotes
 
 
-    fun addNotes(note:String){
+    fun addNotes(note:Notes){
         viewModelScope.launch {
-            repository.insert(Notes(notesWrite =note))
+            repository.insert(note)
         }
     }
 

@@ -51,6 +51,8 @@ fun NotesScreen(viewModel: NotesViewModel) {
                     .padding(top = 30.dp)
             )
 
+            Spacer(modifier = Modifier.height(40.dp))
+
             OutlinedTextField(
                 value = newNote,
                 maxLines = 10,
@@ -64,8 +66,8 @@ fun NotesScreen(viewModel: NotesViewModel) {
             Button(
                 onClick = {
                     if (newNote.isNotBlank()) {
-                        viewModel.addNotes(newNote)
-                        newNote = ""
+                        viewModel.addNotes(Notes(notesWrite = newNote))
+                        newNote =""
                     }
                 },
                 modifier = Modifier.align(Alignment.End),

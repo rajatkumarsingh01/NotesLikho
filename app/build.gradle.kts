@@ -9,6 +9,14 @@ android {
     namespace = "com.example.noteslikho"
     compileSdk = 36
 
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
+
     defaultConfig {
         applicationId = "com.example.noteslikho"
         minSdk = 24
@@ -61,6 +69,14 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     kapt(libs.androidx.room.compiler)
 
+    // Mockito for mocking dependencies
+    testImplementation("org.mockito:mockito-core:5.18.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.0.0")
+    // Coroutines test support (needed for runTest)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+// AndroidX core testing utilities (LiveData / Flow testing helpers)
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
 
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1")
 }

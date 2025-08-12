@@ -1,5 +1,10 @@
 pipeline {
     agent any
+    
+     environment {
+        ANDROID_HOME = '/home/idrbt/Android/Sdk'
+        PATH = "$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
+    }
 
     stages {
         stage('Checkout') {

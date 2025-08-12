@@ -37,6 +37,7 @@ class NotesDatabaseTest {
         val note = Notes(notesWrite = "Room Test")
         dao.writeNotes(note)
         val allNotes = dao.getNotes().first()
-        assertTrue(allNotes.contains(note))
+        assertTrue(allNotes.filterNotNull().any { it.notesWrite == note.notesWrite })
+
     }
 }

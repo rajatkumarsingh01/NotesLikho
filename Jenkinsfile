@@ -41,29 +41,26 @@ pipeline {
         }
 
        
-        
-        stage('Start Emulator') {
-            steps {
-                sh '''
-                    export ANDROID_SDK_ROOT=${ANDROID_HOME}
-                    export PATH=${ANDROID_HOME}/emulator:${ANDROID_HOME}/platform-tools:$PATH
+       stage('Start Emulator') {
+    steps {
+        sh '''
+            echo "Starting emulator: MyAVD"
+            nohup emulator -avd MyAVD -no-audio -no-window &
+            adb wait-for-device
 
-                    AVAILABLE_AVD=$(emulator -list-avds | head -n 1)
-                    if [ -z "$AVAILABLE_AVD" ]; then
-                        echo "Creating AVD named 'MyAVD'..."
-                        avdmanager create avd -n MyAVD -k "system-images;android-30;google_apis;x86_64" --device "pixel_4a" --force
-                        AVAILABLE_AVD="MyAVD"
-                    fi
+            echo "Waiting for emulator to boot..."
+            boot_completed=""
+            until [ "$boot_completed" = "1" ]; do
+                sleep 5
+                boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+                echo "Boot status: $boot_completed"
+            done
 
-                    echo "Starting emulator: $AVAILABLE_AVD"
-                    nohup emulator -avd "$AVAILABLE_AVD" -no-audio -no-window &
-
-                    adb wait-for-device
-                    adb shell input keyevent 82
-                    sleep 30
-                '''
-            }
-        }
+            echo "Emulator booted successfully, unlocking screen..."
+            adb shell input keyevent 82
+        '''
+    }
+}
 
 
 

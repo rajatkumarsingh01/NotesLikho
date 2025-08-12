@@ -1,10 +1,12 @@
 pipeline {
     agent any
+
     
-     environment {
-        ANDROID_HOME = "/home/idrbt/Android/Sdk"
-        PATH = "${env.ANDROID_HOME}/cmdline-tools/latest/bin:${env.ANDROID_HOME}/platform-tools:${env.PATH}"
-    }
+    environment {
+    ANDROID_HOME = "/var/lib/jenkins/Android/Sdk"
+    PATH = "${env.ANDROID_HOME}/cmdline-tools/latest/bin:${env.ANDROID_HOME}/platform-tools:${env.PATH}"
+}
+
     stages {
 
         

@@ -17,6 +17,16 @@ pipeline {
                 sh './gradlew connectedAndroidTest'
             }
         }
+stage('Start Emulator') {
+    steps {
+        sh '''
+            nohup emulator -avd testAVD -no-audio -no-window &
+            adb wait-for-device
+            adb shell input keyevent 82
+        '''
+    }
+}
+
     }
     post {
         always {

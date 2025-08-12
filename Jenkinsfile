@@ -13,6 +13,18 @@ pipeline {
             }
         }
 
+stage('Debug Jenkins Env') {
+    steps {
+        sh '''
+            whoami
+            echo "HOME: $HOME"
+            ls -R $HOME/.android || echo "No .android folder"
+            emulator -list-avds || echo "No AVDs found"
+        '''
+    }
+}
+
+
         stage('Start Emulator') {
             steps {
                 sh '''

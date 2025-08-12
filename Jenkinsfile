@@ -2,10 +2,9 @@ pipeline {
     agent any
     
      environment {
-        ANDROID_HOME = '/home/idrbt/Android/Sdk'
-        PATH = "$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
+        ANDROID_HOME = "/home/idrbt/Android/Sdk"
+        PATH = "${env.ANDROID_HOME}/cmdline-tools/latest/bin:${env.ANDROID_HOME}/platform-tools:${env.PATH}"
     }
-
     stages {
         stage('Checkout') {
             steps {
@@ -13,41 +12,55 @@ pipeline {
             }
         }
 
-stage('Debug Jenkins Env') {
-    steps {
-        sh '''
-            whoami
-            echo "HOME: $HOME"
-            ls -R $HOME/.android || echo "No .android folder"
-            emulator -list-avds || echo "No AVDs found"
-        '''
-    }
-}
 
+    stages {
+        stage('Setup Android SDK Tools') {
+            steps {
+                sh '''
+                    apt-get update && apt-get install -y unzip wget || true
 
-   stage('Start Emulator') {
-    steps {
-        sh '''
-            echo "Detecting available AVDs..."
-            export ANDROID_SDK_ROOT=/home/idrbt/Android/Sdk
-            export PATH=$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$PATH
+                    if [ ! -d "${ANDROID_HOME}/cmdline-tools/latest" ]; then
+                        echo "Installing Android command line tools..."
+                        wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O commandlinetools.zip
+                        mkdir -p ${ANDROID_HOME}/cmdline-tools
+                        unzip -q commandlinetools.zip -d ${ANDROID_HOME}/cmdline-tools
+                        mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest
+                        rm commandlinetools.zip
+                    else
+                        echo "Command line tools already installed."
+                    fi
 
-            AVAILABLE_AVD=$(emulator -list-avds | head -n 1)
-            if [ -z "$AVAILABLE_AVD" ]; then
-                echo "❌ No AVD found. Please create one first."
-                exit 1
-            fi
+                    yes | sdkmanager --sdk_root=${ANDROID_HOME} --licenses || true
+                    sdkmanager --sdk_root=${ANDROID_HOME} "platform-tools" "platforms;android-33" "system-images;android-30;google_apis;x86_64"
+                '''
+            }
+        }
 
-            echo "✅ Starting emulator: $AVAILABLE_AVD"
-            nohup emulator -avd "$AVAILABLE_AVD" -no-audio -no-window &
-            echo "⏳ Waiting for device to be ready..."
-            adb wait-for-device
-            adb shell input keyevent 82
-            echo "⌛ Waiting for emulator to fully boot..."
-            sleep 30
-        '''
-    }
-}
+       
+        
+        stage('Start Emulator') {
+            steps {
+                sh '''
+                    export ANDROID_SDK_ROOT=${ANDROID_HOME}
+                    export PATH=${ANDROID_HOME}/emulator:${ANDROID_HOME}/platform-tools:$PATH
+
+                    AVAILABLE_AVD=$(emulator -list-avds | head -n 1)
+                    if [ -z "$AVAILABLE_AVD" ]; then
+                        echo "Creating AVD named 'MyAVD'..."
+                        avdmanager create avd -n MyAVD -k "system-images;android-30;google_apis;x86_64" --device "pixel_4a" --force
+                        AVAILABLE_AVD="MyAVD"
+                    fi
+
+                    echo "Starting emulator: $AVAILABLE_AVD"
+                    nohup emulator -avd "$AVAILABLE_AVD" -no-audio -no-window &
+
+                    adb wait-for-device
+                    adb shell input keyevent 82
+                    sleep 30
+                '''
+            }
+        }
+
 
 
         stage('Unit Tests') {

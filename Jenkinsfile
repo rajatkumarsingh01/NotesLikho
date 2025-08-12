@@ -6,6 +6,8 @@ pipeline {
         PATH = "${env.ANDROID_HOME}/cmdline-tools/latest/bin:${env.ANDROID_HOME}/platform-tools:${env.PATH}"
     }
     stages {
+
+        
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/rajatkumarsingh01/NotesLikho.git'
@@ -13,7 +15,7 @@ pipeline {
         }
 
 
-    stages {
+  
         stage('Setup Android SDK Tools') {
             steps {
                 sh '''

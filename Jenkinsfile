@@ -25,29 +25,30 @@ stage('Debug Jenkins Env') {
 }
 
 
-        stage('Start Emulator') {
+   stage('Start Emulator') {
     steps {
         sh '''
             echo "Detecting available AVDs..."
-            AVAILABLE_AVD=$(emulator -list-avds | head -n 1)
+            export ANDROID_SDK_ROOT=/home/idrbt/Android/Sdk
+            export PATH=$ANDROID_SDK_ROOT/emulator:$ANDROID_SDK_ROOT/platform-tools:$PATH
 
+            AVAILABLE_AVD=$(emulator -list-avds | head -n 1)
             if [ -z "$AVAILABLE_AVD" ]; then
-                echo "❌ No AVD found! Creating one..."
-                echo no | avdmanager create avd -n Pixel_4a -k "system-images;android-30;google_apis;x86_64" -d pixel_4a
-                AVAILABLE_AVD="Pixel_4a"
+                echo "❌ No AVD found. Please create one first."
+                exit 1
             fi
 
             echo "✅ Starting emulator: $AVAILABLE_AVD"
             nohup emulator -avd "$AVAILABLE_AVD" -no-audio -no-window &
-            
             echo "⏳ Waiting for device to be ready..."
             adb wait-for-device
             adb shell input keyevent 82
-            echo "⌛ Giving emulator time to fully boot..."
+            echo "⌛ Waiting for emulator to fully boot..."
             sleep 30
         '''
     }
 }
+
 
         stage('Unit Tests') {
             steps {
